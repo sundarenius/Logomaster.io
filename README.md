@@ -1,29 +1,7 @@
-# the-app
+# Logomaster.io
 
-## Project setup
-```
-npm install
-```
+Generate cool and modern logos online.
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+Project needs folder restructuring and some refactoring.
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Run your tests
-```
-npm run test
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+https://logomaster.io/
