@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="icon" href="https://logomaster.io/favicon.ico">
+    <title>Logomaster.io - Modern & elegant instant logo generator</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons">
+    <!-- ALL IMPORTED FONT STYLES START -->
+    <link defer href="https://fonts.googleapis.com/css?family=Allerta+Stencil|Anton|Arvo|Baloo|Bevan|Bitter|Black+Ops+One|Carter+One|Chewy|Coiny|Fredericka+the+Great|Indie+Flower|Monoton|Nothing+You+Could+Do|Ultra" rel="stylesheet">
+    <!-- IMPORTED FONT STYLES END -->
+    <script defer src="https://code.jquery.com/jquery-3.2.1.min.js"  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="  crossorigin="anonymous"></script> 
+    <!-- This script used for the Payment Request and Card Element methods -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <!-- This script used for the Checkout method -->
+    <script src="https://checkout.stripe.com/checkout.js"></script>
+    <script src="js/html2canvas.js"></script>
+  </head>
+  <body>
+    <noscript>
+      <strong>We're sorry but the-app doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
+    <div id="app"></div>
+    <!-- built files will be auto injected -->
+
+    <div style="margin-top:-500px">
+        <div style="position:absolute;z-index:-10;text-align:center;padding:50px" id="logoOne"></div>
+        <div style="position:absolute;z-index:-10;text-align:center;padding:50px" id="logoTwo"></div>
+        <div style="position:absolute;z-index:-10;text-align:center;padding:50px" id="logoThree"></div>
+    </div>
+
+    <!-- <div style="text-align:center;padding:50px" id="logoOne"></div>
+    <div style="text-align:center;padding:50px" id="logoTwo"></div>
+    <div style="text-align:center;padding:50px" id="logoThree"></div> -->
+
+  <button style="display:none" id="payBtn"></button>
+  <button style="display:none" id="triggerOrderFunctions"></button>
+  <div style="display:none" id="userEmail"></div>
+  </body>
+
+  <script>
+    const STRIPE_PUBLIC_KEY = 'pk_live_Ou2YgbE02BT74MViHdFOOent';
+    const FIREBASE_FUNCTION = 'https://us-central1-logogenerator-a799f.cloudfunctions.net/charge/';
+    const stripe = Stripe(STRIPE_PUBLIC_KEY);
+    const elements = stripe.elements();
+    const charge_amount = 500;
+    const charge_currency = 'usd';
+    // Store the elements used
+    const elCheckout = document.querySelector('#payBtn');
+    addCheckoutMethod();
+    function addCheckoutMethod() {
+        const handler = StripeCheckout.configure({
+            key: STRIPE_PUBLIC_KEY,
+            locale: 'auto',
+            token: async token => {
+                // Pass the received token to our Firebase function
+                let res = await charge(token, charge_amount, charge_currency);
+                if (res.body.error) console.log('something went wrong')
+                // Card successfully charged
+                document.querySelector('#triggerOrderFunctions').click()
+            }
+        });
+        elCheckout.addEventListener('click', e => {
+            e.preventDefault();
+            handler.open({
+                name: 'Logomaster.io',
+                amount: charge_amount,
+                currency: charge_currency,
+                image: 'https://logomaster.io/favicon.ico'
+            });
+        });
+        // Close Checkout on page navigation
+        window.addEventListener('popstate', () => handler.close());
+    }
+    async function charge(token, amount, currency) {
+        const res = await fetch(FIREBASE_FUNCTION, {
+            method: 'POST',
+            body: JSON.stringify({
+                token,
+                charge: {
+                    amount,
+                    currency,
+                },
+            }),
+        });
+        const data = await res.json();
+        data.body = JSON.parse(data.body);
+        return data;
+    }
+</script>
+
+</html>
